@@ -1,508 +1,526 @@
-import pw from 'playwright';
 import retry from 'async-retry';
+import express from 'express';
+import cors from 'cors';
 
-const takeScreenshot = async (page, log) => {
-    console.log(log ? log + 'Captured' : 'Taking screenshot to page.png')
-    await page.screenshot({ path: 'page.png', fullPage: true })
-}
+import {takeScreenshot,
+        getRapplerNews,
+        getMBNews,
+        getInquirerNews,
+        getPhilStarNews,
+        getBusinessWorldNews} from './scraperFunctions.js'
 
-const getRapplerNews = async (site, selector) => {
-    console.log('Connecting to browser...');
-    const browser = await pw.chromium.launch();
-    console.log('Connected');
-    const page = await browser.newPage();
+const app = express();
 
-    const newsFeed = []
+app.use(express.json());
+
+app.get('/getTopNews', async (req, res, next) => {
+    const newsFeed = [];
     try {
-        await page.goto(site, {timeout: 2 * 60 * 1000 });
-        console.log('Navigated to website. Scraping commenced');
-        await takeScreenshot(page, 'Opening Rappler...');
-    
-        newsFeed.push({
-            title: await page.$eval('.post-card__primary-story h3 a', 
-                anchorElement => anchorElement.innerText),
-            link: await page.$eval('.post-card__primary-story h3 a',
-                anchorElement => anchorElement.getAttribute('href')),
-            image: await page.$eval('.post-card__image img', 
-                imageElement => imageElement.getAttribute('src'))
-        });
+        const fetchAndPush = async (fetchFunction) => {
+            try {
+                const news = await retry(fetchFunction, {
+                    retries: 3,
+                    onRetry: (err) => {
+                        console.log('Retrying...', err);
+                    }
+                });
+                newsFeed.push(...news);
+            } catch (error) {
+                console.error('Error fetching news:', error);
+            }
+        };
 
-        const rapplerTopStories = await page.$$('.post-card__more article ')
-        console.log(rapplerTopStories.length)
-    
-        for (const story of rapplerTopStories) {
-            console.log('clicked')
-            const title = await story.$eval(selector,
-                anchorElement => anchorElement.innerText);
-            const link = await story.$eval(selector,
-                anchorElement => anchorElement.getAttribute('href'));
-            const image = await story.$eval('.post-card__more-secondary-image img',
-                imageElement => imageElement.getAttribute('src'));
-            newsFeed.push({ title, link, image });
-        }
+        await fetchAndPush(() => getRapplerNews('https://www.rappler.com/', '.post-card__secondary-title a'));
+        await fetchAndPush(() => getMBNews('https://mb.com.ph/category/news'));
+        await fetchAndPush(() => getInquirerNews('https://newsinfo.inquirer.net/'));
+        await fetchAndPush(() => getPhilStarNews('https://www.philstar.com/headlines'));
+        await fetchAndPush(() => getBusinessWorldNews('https://www.bworldonline.com/top-stories/'));
+        
+        console.log(newsFeed)
         console.log(newsFeed.length)
 
-        return newsFeed
+        res.status(200).json(newsFeed);
     } catch (error) {
-        await takeScreenshot(page, 'Error');
-        throw error;
-    } finally {
-        await browser.close();
-    };
-}
+        next(error);
+    }
+});
 
-const getMBNews = async (site) => {
-    console.log('Connecting to browser...');
-    const browser = await pw.chromium.launch();
-    console.log('Connected');
-    const page = await browser.newPage();
 
-    const newsFeed = []
-    
+app.get('/getBusinessNews', async (req, res, next) => {
+    const newsFeed = [];
     try {
-        await page.goto(site, {timeout: 2 * 60 * 1000 });
-        console.log('Navigated to website. Scraping commenced');
-        await takeScreenshot(page, 'Opening Manila Bulletin...');
+        const fetchAndPush = async (fetchFunction) => {
+            try {
+                const news = await retry(fetchFunction, {
+                    retries: 3,
+                    onRetry: (err) => {
+                        console.log('Retrying...', err);
+                    }
+                });
+                newsFeed.push(...news);
+            } catch (error) {
+                console.error('Error fetching news:', error);
+            }
+        };
 
-        await page.waitForSelector('.article-list .row.mb-5')
-        const mbTopStories = await page.$$('.article-list .row.mb-5')
-        console.log(mbTopStories.length)
+        await fetchAndPush(() => getRapplerNews('https://www.rappler.com/business/', '.post-card__title a'));
+        await fetchAndPush(() => getMBNews('https://mb.com.ph/category/business'));
+        await fetchAndPush(() => getInquirerNews('https://business.inquirer.net/'));
+        await fetchAndPush(() => getPhilStarNews('https://www.philstar.com/business'));
+        await fetchAndPush(() => getBusinessWorldNews('https://www.bworldonline.com/corporate/'));
 
-        for (const story of mbTopStories) {
-            console.log('Processing...')
-            const title = await story.$eval('.col h4 a',
-                anchorElement => anchorElement.innerText);
-            const link = `https://mb.com.ph${await story.$eval('.col-12.col-sm-4.col > a', 
-                anchorElement => anchorElement.getAttribute('href'))}`;
-            
-            const imageElement = await story.$('.col-12 .v-image__image.v-image__image--cover');
-            const styleAttribute = await imageElement.getAttribute('style');
-            console.log(typeof styleAttribute)
-            const imageUrlMatch = styleAttribute.match(/url\("([^"]+)"\)/);
-            // add default image if no image found
-            const image = imageUrlMatch
-            
-            newsFeed.push({ title, link, image });
-        }
+        console.log(newsFeed)
         console.log(newsFeed.length)
 
-        return newsFeed
+        res.status(200).json(newsFeed);
     } catch (error) {
-        await takeScreenshot(page, 'Error');
-        throw error;
-    } finally {
-        await browser.close();
-    };
-}
+        next(error);
+    }
+});
 
-const getInquirerNews = async (site) => {
-    console.log('Connecting to browser...');
-    const browser = await pw.chromium.launch();
-    console.log('Connected');
-    const page = await browser.newPage();
 
-    const newsFeed = []
+app.get('/getEntertainmentNews', async (req, res, next) => {
+    const newsFeed = [];
     try {
-        await page.goto(site, {timeout: 2 * 60 * 1000 });
-        console.log('Navigated to website. Scraping commenced');
-        await takeScreenshot(page, 'Opening Inquirer...');
+        const fetchAndPush = async (fetchFunction) => {
+            try {
+                const news = await retry(fetchFunction, {
+                    retries: 3,
+                    onRetry: (err) => {
+                        console.log('Retrying...', err);
+                    }
+                });
+                newsFeed.push(...news);
+            } catch (error) {
+                console.error('Error fetching news:', error);
+            }
+        };
 
-        const stories =  await page.$$('#new-channel-grid #ncg-box')
-        const inquirerTopStories = stories.slice(0, 15);
-        console.log(inquirerTopStories.length)
+        await fetchAndPush(() => getRapplerNews('https://www.rappler.com/entertainment/', '.post-card__title a'));
+        await fetchAndPush(() => getMBNews('https://mb.com.ph/category/entertainment'));
+        await fetchAndPush(() => getInquirerNews('https://entertainment.inquirer.net/'));
+        await fetchAndPush(() => getPhilStarNews('https://www.philstar.com/entertainment'));
 
-        for (const story of inquirerTopStories) {
-            console.log('Processing...')
-            const title = await story.$eval('#ncg-info a',
-                anchorElement => anchorElement.innerText);
-            const link = await story.$eval('#ncg-info a',
-                anchorElement => anchorElement.getAttribute('href'));
-            const cssText = await story.$eval('#ncg-img',
-                imageElement => imageElement.getAttribute('style'));
-            const startIndex = cssText.indexOf('(');
-            const endIndex = cssText.indexOf(')');
-            const image = cssText.substring(startIndex + 1, endIndex);
-            newsFeed.push({ title, link, image });
-        }
+        console.log(newsFeed)
         console.log(newsFeed.length)
-  
-        return newsFeed
+
+        res.status(200).json(newsFeed);
+    } catch (error) {
+        next(error);
+    }
+});
+
+
+app.get('/getTechnologyNews', async (req, res, next) => {
+    const newsFeed = [];
+    try {
+        const fetchAndPush = async (fetchFunction) => {
+            try {
+                const news = await retry(fetchFunction, {
+                    retries: 3,
+                    onRetry: (err) => {
+                        console.log('Retrying...', err);
+                    }
+                });
+                newsFeed.push(...news);
+            } catch (error) {
+                console.error('Error fetching news:', error);
+            }
+        };
+
+        await fetchAndPush(() => getRapplerNews('https://www.rappler.com/technology/', '.post-card__title a'));
+        await fetchAndPush(() => getMBNews('https://mb.com.ph/category/technology'));
+        await fetchAndPush(() => getInquirerNews('https://technology.inquirer.net/'));
+        await fetchAndPush(() => getBusinessWorldNews('https://www.bworldonline.com/technology/'));
+
+        console.log(newsFeed)
+        console.log(newsFeed.length)
+
+        res.status(200).json(newsFeed);
+    } catch (error) {
+        next(error);
+    }
+});
+
+
+app.get('/getSportsNews', async (req, res, next) => {
+    const newsFeed = [];
+    try {
+        const fetchAndPush = async (fetchFunction) => {
+            try {
+                const news = await retry(fetchFunction, {
+                    retries: 3,
+                    onRetry: (err) => {
+                        console.log('Retrying...', err);
+                    }
+                });
+                newsFeed.push(...news);
+            } catch (error) {
+                console.error('Error fetching news:', error);
+            }
+        };
+
+        await fetchAndPush(() => getRapplerNews('https://www.rappler.com/sports/', '.post-card__title a'));
+        await fetchAndPush(() => getMBNews('https://mb.com.ph/category/sports'));
+        await fetchAndPush(() => getInquirerNews('https://sports.inquirer.net/'));
+        await fetchAndPush(() => getPhilStarNews('https://www.philstar.com/sports'));
+        await fetchAndPush(() => getBusinessWorldNews('https://www.bworldonline.com/sports/'));
+
+        console.log(newsFeed)
+        console.log(newsFeed.length)
+
+        res.status(200).json(newsFeed);
     } catch (error) {
         await takeScreenshot(page, 'Error');
-        throw error;
-    } finally {
-        await browser.close();
-    };
-}
+        next(error);
+    }
+});
 
-const getPhilStarNews = async (site) => {
-    console.log('Connecting to browser...');
-    const browser = await pw.chromium.launch();
-    console.log('Connected');
-    const page = await browser.newPage();
 
-    const newsFeed = []
+app.get('/getLifestyleNews', async (req, res, next) => {
+    const newsFeed = [];
     try {
-        await page.goto(site, {timeout: 2 * 60 * 1000 });
-        console.log('Navigated to website. Scraping commenced');
-        await takeScreenshot(page, 'Opening PhilStar...');
-
-        const philStarTopStories =  await page.$$('.carousel__items .carousel__item');
-        console.log(philStarTopStories.length);
-
-        for (const story of philStarTopStories) {
-            console.log('Processing...');
+        const fetchAndPush = async (fetchFunction) => {
             try {
-                const title = await story.$eval('.carousel__item__title h2 a',
-                    anchorElement => anchorElement.innerText);
-                const link = await story.$eval('.carousel__item__title h2 a',
-                    anchorElement => anchorElement.getAttribute('href'));
-                const image = await story.$eval('.carousel__item__image picture img',
-                    anchorElement => anchorElement.getAttribute('src'));
-                
-                newsFeed.push({ title, link, image });
+                const news = await retry(fetchFunction, {
+                    retries: 3,
+                    onRetry: (err) => {
+                        console.log('Retrying...', err);
+                    }
+                });
+                newsFeed.push(...news);
             } catch (error) {
-                console.log('Error occurred while scraping story:', error);
+                console.error('Error fetching news:', error);
             }
-        }
+        };
 
-        const philStarLatestStories =  await page.$$('.news_column.latest .tiles.late');
-        console.log(philStarLatestStories.length);
+        await fetchAndPush(() => getRapplerNews('https://www.rappler.com/life-and-style/', '.post-card__title a'));
+        await fetchAndPush(() => getMBNews('https://mb.com.ph/category/lifestyle'));
+        await fetchAndPush(() => getBusinessWorldNews('https://www.bworldonline.com/health/'));
 
-        for (const story of philStarLatestStories) {
-            console.log('Processing...');
-            try {
-                const title = await story.$eval('.TilesText.spec h2 a',
-                    anchorElement => anchorElement.innerText);
-                const link = await story.$eval('.TilesText.spec h2 a',
-                    anchorElement => anchorElement.getAttribute('href'));
-                const imageUrl = await story.$eval('.tiles_image > .tiles_overflow_holder > a > img',
-                    anchorElement => anchorElement.getAttribute('data-srcset'));
-                const imageUrlParts = imageUrl.split(".jpg");
-                const image = imageUrlParts[0] + ".jpg";
+        console.log(newsFeed)
+        console.log(newsFeed.length)
 
-                newsFeed.push({ title, link, image });
-            } catch (error) {
-                console.log('Error occurred while scraping story:', error);
-            }
-        }
-
-        const philStarTrendingStories =  await page.$$('.news_column.trending .tiles.trend');
-        console.log(philStarTrendingStories.length);
-
-        for (const story of philStarTrendingStories) {
-            console.log('Processing...');
-            try {
-                const title = await story.$eval('.TilesText.spec h2 a',
-                    anchorElement => anchorElement.innerText);
-                const link = await story.$eval('.TilesText.spec h2 a',
-                    anchorElement => anchorElement.getAttribute('href'));
-                const imageUrl = await story.$eval('.tiles_image > .tiles_overflow_holder > a > img',
-                    anchorElement => anchorElement.getAttribute('data-srcset'));
-                const imageUrlParts = imageUrl.split(".jpg");
-                const image = imageUrlParts[0] + ".jpg";
-
-                newsFeed.push({ title, link, image });
-            } catch (error) {
-                console.log('Error occurred while scraping story:', error);
-            }
-        }
-
-        return newsFeed
+        res.status(200).json(newsFeed);
     } catch (error) {
-        console.log('Error occurred while scraping story:', error);
         await takeScreenshot(page, 'Error');
-        throw error;
-    } finally {
-        await browser.close();
-    };
-}
+        next(error);
+    }
+});
 
-const getBusinessWorldNews = async (site) => {
-    console.log('Connecting to browser...');
-    const browser = await pw.chromium.launch();
-    console.log('Connected');
-    const page = await browser.newPage();
 
-    const newsFeed = []
+app.get('/getWorldNews', async (req, res, next) => {
+    const newsFeed = [];
     try {
-        await page.goto(site, {timeout: 2 * 60 * 1000 });
-        console.log('Navigated to website. Scraping commenced');
-        await takeScreenshot(page, 'Opening Business World...');
+        const fetchAndPush = async (fetchFunction) => {
+            try {
+                const news = await retry(fetchFunction, {
+                    retries: 3,
+                    onRetry: (err) => {
+                        console.log('Retrying...', err);
+                    }
+                });
+                newsFeed.push(...news);
+            } catch (error) {
+                console.error('Error fetching news:', error);
+            }
+        };
 
-        const bwTopStories =  await page.$$('.td-ss-main-content .td_module_10');
-        console.log(bwTopStories.length);
+        await fetchAndPush(() => getRapplerNews('https://www.rappler.com/world/', '.post-card__title a'));
+        await fetchAndPush(() => getInquirerNews('https://globalnation.inquirer.net/'));
+        await fetchAndPush(() => getPhilStarNews('https://www.philstar.com/world'));
+        await fetchAndPush(() => getBusinessWorldNews('https://www.bworldonline.com/world/'));
 
-        for (const story of bwTopStories) {
-            console.log('Processing...');
-            const title = await story.$eval('.td-module-thumb a',
-                anchorElement => anchorElement.getAttribute('title'));
-            const link = await story.$eval('.td-module-thumb a',
-                anchorElement => anchorElement.getAttribute('href'));
-            const image = await story.$eval('.td-module-thumb a img',
-                anchorElement => anchorElement.getAttribute('data-img-url'));
-            
-            newsFeed.push({ title, link, image });
-        }
+        console.log(newsFeed)
         console.log(newsFeed.length)
         
-        return newsFeed
-    } catch (error) {
-        console.log('Error occurred while scraping story:', error);
-        await takeScreenshot(page, 'Error');
-        throw error;
-    } finally {
-        await browser.close();
-    };
-}
-
-const topNews = async () => {
-    const newsFeed = []
-    try {
-        const rapplerNews = await getRapplerNews('https://www.rappler.com/', '.post-card__secondary-title a')
-        newsFeed.push(...rapplerNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-        const mbNews = await getMBNews('https://mb.com.ph/category/news')
-        newsFeed.push(...mbNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-        const inquirerNews = await getInquirerNews('https://newsinfo.inquirer.net/')
-        newsFeed.push(...inquirerNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-        const philStarNews = await getPhilStarNews('https://www.philstar.com/headlines')
-        newsFeed.push(...philStarNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-        const businessWorldNews = await getBusinessWorldNews('https://www.bworldonline.com/top-stories/')
-        newsFeed.push(...businessWorldNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
+        res.status(200).json(newsFeed);
     } catch (error) {
         await takeScreenshot(page, 'Error');
-        throw error;
+        next(error);
     }
-};
+});
 
-const businessNews = async () => {
-    const newsFeed = []
+
+app.get('/getOpinionNews', async (req, res, next) => {
+    const newsFeed = [];
     try {
-        const rapplerNews = await getRapplerNews('https://www.rappler.com/business/', '.post-card__title a')
-        newsFeed.push(...rapplerNews)
+        const fetchAndPush = async (fetchFunction) => {
+            try {
+                const news = await retry(fetchFunction, {
+                    retries: 3,
+                    onRetry: (err) => {
+                        console.log('Retrying...', err);
+                    }
+                });
+                newsFeed.push(...news);
+            } catch (error) {
+                console.error('Error fetching news:', error);
+            }
+        };
+
+        await fetchAndPush(() => getMBNews('https://mb.com.ph/category/opinion'));
+        await fetchAndPush(() => getPhilStarNews('https://www.philstar.com/opinion'));
+        await fetchAndPush(() => getBusinessWorldNews('https://www.bworldonline.com/opinion/'));
+
         console.log(newsFeed)
         console.log(newsFeed.length)
-
-        const mbNews = await getMBNews('https://mb.com.ph/category/business')
-        newsFeed.push(...mbNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-        const inquirerNews = await getInquirerNews('https://business.inquirer.net/')
-        newsFeed.push(...inquirerNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-        const philStarNews = await getPhilStarNews('https://www.philstar.com/business')
-        newsFeed.push(...philStarNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-        const businessWorldNews = await getBusinessWorldNews('https://www.bworldonline.com/corporate/')
-        newsFeed.push(...businessWorldNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
+        
+        res.status(200).json(newsFeed);
     } catch (error) {
         await takeScreenshot(page, 'Error');
-        throw error;
+        next(error);
     }
-};
+});
 
-const entertainmentNews = async () => {
-    const newsFeed = []
-    try {
-        const rapplerNews = await getRapplerNews('https://www.rappler.com/entertainment/', '.post-card__title a')
-        newsFeed.push(...rapplerNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
 
-        const mbNews = await getMBNews('https://mb.com.ph/category/entertainment')
-        newsFeed.push(...mbNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
+// const topNews = async () => {
+//     const newsFeed = []
+//     try {
+//         const rapplerNews = await getRapplerNews('https://www.rappler.com/', '.post-card__secondary-title a')
+//         newsFeed.push(...rapplerNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
 
-        const inquirerNews = await getInquirerNews('https://entertainment.inquirer.net/')
-        newsFeed.push(...inquirerNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
+//         const mbNews = await getMBNews('https://mb.com.ph/category/news')
+//         newsFeed.push(...mbNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
 
-        const philStarNews = await getPhilStarNews('https://www.philstar.com/entertainment')
-        newsFeed.push(...philStarNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
+//         const inquirerNews = await getInquirerNews('https://newsinfo.inquirer.net/')
+//         newsFeed.push(...inquirerNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
 
-    } catch (error) {
-        await takeScreenshot(page, 'Error');
-        throw error;
-    }
-};
+//         const philStarNews = await getPhilStarNews('https://www.philstar.com/headlines')
+//         newsFeed.push(...philStarNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
 
-const technologyNews = async () => {
-    const newsFeed = []
-    try {
-        const rapplerNews = await getRapplerNews('https://www.rappler.com/technology/', '.post-card__title a')
-        newsFeed.push(...rapplerNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
+//         const businessWorldNews = await getBusinessWorldNews('https://www.bworldonline.com/top-stories/')
+//         newsFeed.push(...businessWorldNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
 
-        const mbNews = await getMBNews('https://mb.com.ph/category/technology')
-        newsFeed.push(...mbNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-        const inquirerNews = await getInquirerNews('https://technology.inquirer.net/')
-        newsFeed.push(...inquirerNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-        const businessWorldNews = await getBusinessWorldNews('https://www.bworldonline.com/technology/')
-        newsFeed.push(...businessWorldNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-    } catch (error) {
-        await takeScreenshot(page, 'Error');
-        throw error;
-    }
-};
-
-const sportsNews = async () => {
-    const newsFeed = []
-    try {
-        const rapplerNews = await getRapplerNews('https://www.rappler.com/sports/', '.post-card__title a')
-        newsFeed.push(...rapplerNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-        const mbNews = await getMBNews('https://mb.com.ph/category/sports')
-        newsFeed.push(...mbNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-        const inquirerNews = await getInquirerNews('https://sports.inquirer.net/')
-        newsFeed.push(...inquirerNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-        const philStarNews = await getPhilStarNews('https://www.philstar.com/sports')
-        newsFeed.push(...philStarNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-        const businessWorldNews = await getBusinessWorldNews('https://www.bworldonline.com/sports/')
-        newsFeed.push(...businessWorldNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-    } catch (error) {
-        await takeScreenshot(page, 'Error');
-        throw error;
-    }
-};
-
-const lifestyleNews = async () => {
-    const newsFeed = []
-    try {
-        const rapplerNews = await getRapplerNews('https://www.rappler.com/life-and-style/', '.post-card__title a')
-        newsFeed.push(...rapplerNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-        const mbNews = await getMBNews('https://mb.com.ph/category/lifestyle')
-        newsFeed.push(...mbNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-        const businessWorldNews = await getBusinessWorldNews('https://www.bworldonline.com/health/')
-        newsFeed.push(...businessWorldNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-    } catch (error) {
-        await takeScreenshot(page, 'Error');
-        throw error;
-    }
-};
-
-const worldNews = async () => {
-    const newsFeed = []
-    try {
-        const rapplerNews = await getRapplerNews('https://www.rappler.com/world/', '.post-card__title a')
-        newsFeed.push(...rapplerNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-        const inquirerNews = await getInquirerNews('https://globalnation.inquirer.net/')
-        newsFeed.push(...inquirerNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-        const philStarNews = await getPhilStarNews('https://www.philstar.com/world')
-        newsFeed.push(...philStarNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-        const businessWorldNews = await getBusinessWorldNews('https://www.bworldonline.com/world/')
-        newsFeed.push(...businessWorldNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-    } catch (error) {
-        await takeScreenshot(page, 'Error');
-        throw error;
-    }
-};
-
-const opinionNews = async () => {
-    const newsFeed = []
-    try {
-        const mbNews = await getMBNews('https://mb.com.ph/category/opinion')
-        newsFeed.push(...mbNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-        const philStarNews = await getPhilStarNews('https://www.philstar.com/opinion')
-        newsFeed.push(...philStarNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-        const businessWorldNews = await getBusinessWorldNews('https://www.bworldonline.com/opinion/')
-        newsFeed.push(...businessWorldNews)
-        console.log(newsFeed)
-        console.log(newsFeed.length)
-
-    } catch (error) {
-        await takeScreenshot(page, 'Error');
-        throw error;
-    }
-};
-
-// await retry(topStories, {
-//     retries: 3,
-//     onRetry: (err) => {
-//         console.log('retrying...', err);
+//     } catch (error) {
+//         await takeScreenshot(page, 'Error');
+//         throw error;
 //     }
-// });
+// };
 
-await retry(opinionNews, {
-    retries: 3,
-    onRetry: (err) => {
-        console.log('retrying...', err);
-    }
+// const businessNews = async () => {
+//     const newsFeed = []
+//     try {
+//         const rapplerNews = await getRapplerNews('https://www.rappler.com/business/', '.post-card__title a')
+//         newsFeed.push(...rapplerNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//         const mbNews = await getMBNews('https://mb.com.ph/category/business')
+//         newsFeed.push(...mbNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//         const inquirerNews = await getInquirerNews('https://business.inquirer.net/')
+//         newsFeed.push(...inquirerNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//         const philStarNews = await getPhilStarNews('https://www.philstar.com/business')
+//         newsFeed.push(...philStarNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//         const businessWorldNews = await getBusinessWorldNews('https://www.bworldonline.com/corporate/')
+//         newsFeed.push(...businessWorldNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//     } catch (error) {
+//         await takeScreenshot(page, 'Error');
+//         throw error;
+//     }
+// };
+
+// const entertainmentNews = async () => {
+//     const newsFeed = []
+//     try {
+//         const rapplerNews = await getRapplerNews('https://www.rappler.com/entertainment/', '.post-card__title a')
+//         newsFeed.push(...rapplerNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//         const mbNews = await getMBNews('https://mb.com.ph/category/entertainment')
+//         newsFeed.push(...mbNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//         const inquirerNews = await getInquirerNews('https://entertainment.inquirer.net/')
+//         newsFeed.push(...inquirerNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//         const philStarNews = await getPhilStarNews('https://www.philstar.com/entertainment')
+//         newsFeed.push(...philStarNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//     } catch (error) {
+//         await takeScreenshot(page, 'Error');
+//         throw error;
+//     }
+// };
+
+// const technologyNews = async () => {
+//     const newsFeed = []
+//     try {
+//         const rapplerNews = await getRapplerNews('https://www.rappler.com/technology/', '.post-card__title a')
+//         newsFeed.push(...rapplerNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//         const mbNews = await getMBNews('https://mb.com.ph/category/technology')
+//         newsFeed.push(...mbNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//         const inquirerNews = await getInquirerNews('https://technology.inquirer.net/')
+//         newsFeed.push(...inquirerNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//         const businessWorldNews = await getBusinessWorldNews('https://www.bworldonline.com/technology/')
+//         newsFeed.push(...businessWorldNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//     } catch (error) {
+//         await takeScreenshot(page, 'Error');
+//         throw error;
+//     }
+// };
+
+// const sportsNews = async () => {
+//     const newsFeed = []
+//     try {
+//         const rapplerNews = await getRapplerNews('https://www.rappler.com/sports/', '.post-card__title a')
+//         newsFeed.push(...rapplerNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//         const mbNews = await getMBNews('https://mb.com.ph/category/sports')
+//         newsFeed.push(...mbNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//         const inquirerNews = await getInquirerNews('https://sports.inquirer.net/')
+//         newsFeed.push(...inquirerNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//         const philStarNews = await getPhilStarNews('https://www.philstar.com/sports')
+//         newsFeed.push(...philStarNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//         const businessWorldNews = await getBusinessWorldNews('https://www.bworldonline.com/sports/')
+//         newsFeed.push(...businessWorldNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//     } catch (error) {
+//         await takeScreenshot(page, 'Error');
+//         throw error;
+//     }
+// };
+
+// const lifestyleNews = async () => {
+//     const newsFeed = []
+//     try {
+//         const rapplerNews = await getRapplerNews('https://www.rappler.com/life-and-style/', '.post-card__title a')
+//         newsFeed.push(...rapplerNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//         const mbNews = await getMBNews('https://mb.com.ph/category/lifestyle')
+//         newsFeed.push(...mbNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//         const businessWorldNews = await getBusinessWorldNews('https://www.bworldonline.com/health/')
+//         newsFeed.push(...businessWorldNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//     } catch (error) {
+//         await takeScreenshot(page, 'Error');
+//         throw error;
+//     }
+// };
+
+// const worldNews = async () => {
+//     const newsFeed = []
+//     try {
+//         const rapplerNews = await getRapplerNews('https://www.rappler.com/world/', '.post-card__title a')
+//         newsFeed.push(...rapplerNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//         const inquirerNews = await getInquirerNews('https://globalnation.inquirer.net/')
+//         newsFeed.push(...inquirerNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//         const philStarNews = await getPhilStarNews('https://www.philstar.com/world')
+//         newsFeed.push(...philStarNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//         const businessWorldNews = await getBusinessWorldNews('https://www.bworldonline.com/world/')
+//         newsFeed.push(...businessWorldNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//     } catch (error) {
+//         await takeScreenshot(page, 'Error');
+//         throw error;
+//     }
+// };
+
+// const opinionNews = async () => {
+//     const newsFeed = []
+//     try {
+//         const mbNews = await getMBNews('https://mb.com.ph/category/opinion')
+//         newsFeed.push(...mbNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//         const philStarNews = await getPhilStarNews('https://www.philstar.com/opinion')
+//         newsFeed.push(...philStarNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//         const businessWorldNews = await getBusinessWorldNews('https://www.bworldonline.com/opinion/')
+//         newsFeed.push(...businessWorldNews)
+//         console.log(newsFeed)
+//         console.log(newsFeed.length)
+
+//     } catch (error) {
+//         await takeScreenshot(page, 'Error');
+//         throw error;
+//     }
+// };
+
+app.listen(3000, () => {
+    console.log(`Server running on port 3000`);
+});
+
+app.use((err, req, res,next) => {
+    const statusCode = err.statusCode || 500;
+    const message = err.message || 'Internal Server Error'
+    return res.status(statusCode).json({
+        success: false,
+        message,
+        statusCode
+    });
 });
