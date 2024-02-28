@@ -23,7 +23,8 @@ export const getRapplerNews = async (site, selector) => {
             link: await page.$eval('.post-card__primary-story h3 a',
                 anchorElement => anchorElement.getAttribute('href')),
             image: await page.$eval('.post-card__image img', 
-                imageElement => imageElement.getAttribute('src'))
+                imageElement => imageElement.getAttribute('src')),
+            source: 'Rappler'
         });
 
         const rapplerTopStories = await page.$$('.post-card__more article ')
@@ -37,7 +38,8 @@ export const getRapplerNews = async (site, selector) => {
                 anchorElement => anchorElement.getAttribute('href'));
             const image = await story.$eval('.post-card__more-secondary-image img',
                 imageElement => imageElement.getAttribute('src'));
-            newsFeed.push({ title, link, image });
+            const source = 'Rappler'
+            newsFeed.push({ title, link, image, source });
         }
         console.log(newsFeed.length)
 
@@ -80,8 +82,9 @@ export const getMBNews = async (site) => {
             const imageUrlMatch = styleAttribute.match(/url\("([^"]+)"\)/);
             // add default image if no image found
             const image = imageUrlMatch
+            const source = 'Manile Bulletin'
             
-            newsFeed.push({ title, link, image });
+            newsFeed.push({ title, link, image, source });
         }
         console.log(newsFeed.length)
 
@@ -121,7 +124,8 @@ export const getInquirerNews = async (site) => {
             const startIndex = cssText.indexOf('(');
             const endIndex = cssText.indexOf(')');
             const image = cssText.substring(startIndex + 1, endIndex);
-            newsFeed.push({ title, link, image });
+            const source = 'Inquirer';
+            newsFeed.push({ title, link, image, source });
         }
         console.log(newsFeed.length)
   
@@ -158,8 +162,9 @@ export const getPhilStarNews = async (site) => {
                     anchorElement => anchorElement.getAttribute('href'));
                 const image = await story.$eval('.carousel__item__image picture img',
                     anchorElement => anchorElement.getAttribute('src'));
+                const source = 'PhilStar';
                 
-                newsFeed.push({ title, link, image });
+                newsFeed.push({ title, link, image, source });
             } catch (error) {
                 console.log('Error occurred while scraping story:', error);
             }
@@ -179,8 +184,9 @@ export const getPhilStarNews = async (site) => {
                     anchorElement => anchorElement.getAttribute('data-srcset'));
                 const imageUrlParts = imageUrl.split(".jpg");
                 const image = imageUrlParts[0] + ".jpg";
+                const source = 'PhilStar';
 
-                newsFeed.push({ title, link, image });
+                newsFeed.push({ title, link, image, source });
             } catch (error) {
                 console.log('Error occurred while scraping story:', error);
             }
@@ -200,8 +206,9 @@ export const getPhilStarNews = async (site) => {
                     anchorElement => anchorElement.getAttribute('data-srcset'));
                 const imageUrlParts = imageUrl.split(".jpg");
                 const image = imageUrlParts[0] + ".jpg";
+                const source = 'PhilStar';
 
-                newsFeed.push({ title, link, image });
+                newsFeed.push({ title, link, image, source });
             } catch (error) {
                 console.log('Error occurred while scraping story:', error);
             }
@@ -240,8 +247,9 @@ export const getBusinessWorldNews = async (site) => {
                 anchorElement => anchorElement.getAttribute('href'));
             const image = await story.$eval('.td-module-thumb a img',
                 anchorElement => anchorElement.getAttribute('data-img-url'));
+            const source = 'Business World';
             
-            newsFeed.push({ title, link, image });
+            newsFeed.push({ title, link, image, source });
         }
         console.log(newsFeed.length)
         

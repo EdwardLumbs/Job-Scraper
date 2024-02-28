@@ -170,7 +170,6 @@ app.get('/getSportsNews', async (req, res, next) => {
 
         res.status(200).json(newsFeed);
     } catch (error) {
-        await takeScreenshot(page, 'Error');
         next(error);
     }
 });
@@ -202,13 +201,13 @@ app.get('/getLifestyleNews', async (req, res, next) => {
 
         res.status(200).json(newsFeed);
     } catch (error) {
-        await takeScreenshot(page, 'Error');
         next(error);
     }
 });
 
 
 app.get('/getWorldNews', async (req, res, next) => {
+    console.log('clicked')
     const newsFeed = [];
     try {
         const fetchAndPush = async (fetchFunction) => {
@@ -221,7 +220,7 @@ app.get('/getWorldNews', async (req, res, next) => {
                 });
                 newsFeed.push(...news);
             } catch (error) {
-                console.error('Error fetching news:', error);
+                console.log('Error fetching news:', error);
             }
         };
 
@@ -235,7 +234,6 @@ app.get('/getWorldNews', async (req, res, next) => {
         
         res.status(200).json(newsFeed);
     } catch (error) {
-        await takeScreenshot(page, 'Error');
         next(error);
     }
 });
@@ -267,7 +265,6 @@ app.get('/getOpinionNews', async (req, res, next) => {
         
         res.status(200).json(newsFeed);
     } catch (error) {
-        await takeScreenshot(page, 'Error');
         next(error);
     }
 });
