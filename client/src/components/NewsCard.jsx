@@ -23,9 +23,12 @@ export default function NewsCard({article}) {
                     src={article.image} 
                     alt="Cover Image" 
                 />
-                <div className="flex flex-col gap-2 py-2">
+                <div className="flex flex-col py-2">
                     <p className='px-4 text-2xl font-bold line-clamp-3 mb-2'>
                         {article.title}
+                    </p>
+                    <p className="px-4 mb-2 font-semibold">
+                        Source: {article.source}
                     </p>
                 </div>
             </div>

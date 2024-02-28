@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import NewsCard from '../components/NewsCard';
+import SiteFilter from '../components/SiteFilter';
+import Headlines from '../components/Headlines';
 
 export default function World() {
   const [articles, setArticles] = useState([]);
@@ -59,53 +59,15 @@ export default function World() {
   return (
     <div>
       <div className='container my-10 mx-auto px-4'>
-        <div className='flex justify-between'>
-          <img 
-            className='w-32 h-32 object-cover rounded-xl hover:cursor-pointer'
-            onClick={() => setFilteredArticles(articles)}
-            src="/all.png" 
-            alt="all" 
-          />
-          <img 
-            className='w-32 h-32 object-cover rounded-xl hover:cursor-pointer'
-            onClick={handleClick}
-            id='Rappler'
-            src="/rappler.png" 
-            alt="rappler" 
-          />
-          <img 
-            className='w-32 h-32 object-cover rounded-xl hover:cursor-pointer'
-            onClick={handleClick}
-            id='Inquirer'
-            src="/inquirer.jpg" 
-            alt="inquirer" 
-          />
-          <img 
-            className='w-32 h-32 object-cover rounded-xl hover:cursor-pointer'
-            onClick={handleClick}
-            id='Business World'
-            src="/BW.png" 
-            alt="BW" 
-          />
-          <img 
-            className='w-32 h-32 object-cover rounded-xl hover:cursor-pointer'
-            onClick={handleClick}
-            id='Manila Bulletin'
-            src="/MB.jpeg" 
-            alt="MB" 
-          />
-          <img 
-            className='w-32 h-32 object-cover rounded-xl hover:cursor-pointer'
-            onClick={handleClick}
-            id='Philstar'
-            src="/philstar.jpg" 
-            alt="philstar" 
-          />
-        </div>
+        <SiteFilter 
+          handleClick={handleClick} 
+          setFilteredArticles={setFilteredArticles}
+          articles={articles}
+        />
 
         <div className='mt-10'>
           { loading ? 
-            <div className='mx-auto mt-32 animate-pulse h-svh flex flex-col items-center'>
+            <div className='mx-auto pt-32 animate-pulse h-screen flex flex-col items-center'>
                 <img 
                     className='h-[120px]'
                     src="/newspaper.svg" 
@@ -116,75 +78,39 @@ export default function World() {
                 </p>
             </div>
           : error ?
-            <p>
-              Error
-            </p>
+          <div className='mx-auto pt-32 h-screen flex flex-col items-center'>
+              <img 
+                  className='h-[120px]'
+                  src="/error.svg" 
+                  alt="error" 
+              />
+              <p className='text-lg'>
+                  {error}
+              </p>
+          </div>
           :
-            filteredArticles.length > 0 && (
+            filteredArticles.length > 0 ? (
             <div className=''>
-              <div className='flex'>
-                <div className='bg-white shadow-md hover:shadow-lg relative
-                    transition-shadow overflow-hidden rounded-lg w-full flex-1'
-                >
-                  <Link
-                    to={filteredArticles[0].link}
-                    target='_blank'
-                  >
-                    <img 
-                      className='h-full w-full object-cover hover:scale-105 transition-scale duration-300'
-                      src={filteredArticles[0].image} 
-                      alt="Cover Image" 
-                    />
-                      <div className="absolute left-0 right-0 bottom-0 
-                        p-7 flex flex-col gap-1 hover:scale-105 transition-scale duration-300">
-                        <p 
-                            className='text-6xl font-bold text-white'
-                            style={{ textShadow: '0 0 5px rgba(0,0,0,0.5)' }}
-                        >
-                            {filteredArticles[0].title}
-                        </p>
-                      </div>
-                  </Link>
-                </div>
-                <div className='flex gap-4 flex-col flex-1'>
-                  {filteredArticles.slice(1, 6).map((article, index) => (
-                    <div className='bg-white shadow-md hover:shadow-lg px-3
-                        transition-shadow overflow-hidden rounded-lg w-full flex items-center'>
-                        <img 
-                            className='w-36 h-36 rounded-lg object-cover hover:scale-105 transition-scale duration-300'
-                            src={article.image} 
-                            alt="Cover Image" 
-                        />
-                        <div className="py-4 px-4 gap-1">
-                            <p className='text-2xl font-bold line-clamp-2'>
-                                {article.title}
-                            </p>
-                        </div>
-                    </div>
-                  ))}
-
-                </div>
-              </div>
-
-              {filteredArticles.length > 5 &&
-                <p className='mt-10 font-bold text-3xl'>
-                  More News
+              <div>
+                <p className='mb-4 font-bold text-3xl'>
+                  Today's World Headlines
                 </p>
-              }
-
-              <div className='flex flex-wrap mt-5 gap-4'>
-                {filteredArticles.slice(7).map((article, index) => (
-                  <Link 
-                    key={index}
-                    to={article.link}
-                    target='_blank'
-                  >
-                    <NewsCard article={article} />
-                  </Link>
-                ))}
               </div>
+              <Headlines articles={filteredArticles}/>
             </div>
-          )}
+            )
+            :
+            <div className='mx-auto pt-32 h-screen flex flex-col items-center'>
+                <img 
+                    className='h-[120px]'
+                    src="/magnifying-glass.svg" 
+                    alt="glass" 
+                />
+                <p className='text-lg'>
+                    No News Articles Found
+                </p>
+            </div>
+          }
         </div>
       </div>
     </div>
