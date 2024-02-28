@@ -26,6 +26,13 @@ export default function Header() {
 
         <div
           className='transition-opacity duration-100 hover:opacity-70 hover:cursor-pointer'
+          id='top'
+          onClick={handleClick}
+        >
+          TOP
+        </div>
+        <div
+          className='transition-opacity duration-100 hover:opacity-70 hover:cursor-pointer'
           id='world'
           onClick={handleClick}
         >

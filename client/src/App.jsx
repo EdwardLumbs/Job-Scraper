@@ -9,6 +9,7 @@ import Sports from './pages/Sports';
 import Lifestyle from './pages/Lifestyle';
 import Opinion from './pages/Opinion';
 import Footer from './components/Footer';
+import Top from './pages/Top';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <Header/>
       <Routes>
         <Route path='/' element={<Home/>}/>
+        <Route path='/top' element={<Top/>}/>
         <Route path='/world' element={<World/>}/>
         <Route path='/business' element={<Business/>}/>
         <Route path='/entertainment' element={<Entertainment/>}/>
