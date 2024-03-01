@@ -90,7 +90,7 @@ export default function Sports() {
           articles={articles}
         />
         <div>
-          <p className='my-10 font-bold text-5xl'>
+          <p className='my-10 font-bold text-3xl'>
             Today's Sports Headlines
           </p>
         </div>

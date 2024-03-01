@@ -41,7 +41,7 @@ export default function Header() {
         >
           <Link to='/'>
             <div className="text-xl">
-              NewsBlews
+              EdwardNews
             </div>
           </Link>
 

@@ -8,6 +8,7 @@ export default function Business() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  
   useEffect(() => {
     const getBusinessNews = async () => {
       try {
@@ -90,7 +91,7 @@ export default function Business() {
           articles={articles}
         />
         <div>
-          <p className='my-10 font-bold text-5xl'>
+          <p className='my-10 font-bold text-3xl'>
             Today's Business Headlines
           </p>
         </div>
