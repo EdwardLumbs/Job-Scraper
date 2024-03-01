@@ -3,7 +3,7 @@ import express from 'express';
 import pool from './database/db.js';
 import { errorHandler } from './error.js';
 import path from 'path';
-
+import cors from 'cors';
 import {getRapplerNews,
         getMBNews,
         getInquirerNews,
@@ -15,6 +15,8 @@ const __dirname = path.resolve();
 const app = express();
 
 app.use(express.json());
+app.use(cors());
+
 
 app.post('/addArticles', async (req, res, next) => {
     const { title, image, link, category, source } = req.body;
