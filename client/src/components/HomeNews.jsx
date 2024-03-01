@@ -1,55 +1,41 @@
 import { useState, useEffect } from 'react';
 import NewsCard from './NewsCard';
 import { Link } from 'react-router-dom';
+import { FaArrowRight } from "react-icons/fa";
 
-export default function HomeNews({location, apiTitle}) {
-    const [articles, setArticles] = useState([])
+export default function HomeNews({category}) {
+    const [articles, setArticles] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState(null);  
 
     useEffect(() => {
-        const getNews = async () => {
+        const fetchNews = async () => {
             try {
                 setLoading(true);
-                const res = await fetch (`/api/${apiTitle}`);
-                const data = await res.json();
+                const res = await fetch(`/api/getArticles/${category}`)
+                const data = await res.json()
                 console.log(data)
-                
+
                 if (data.success === false) {
                     setError(data.message)
                     setLoading(false)
                     return
                 }
-              
-                const newsArticles = data.sort((a, b) => {
-                    const titleA = a.title.toUpperCase();
-                    const titleB = b.title.toUpperCase();
-
-                    if (titleA < titleB) {
-                        return -1;
-                    }
-                    if (titleA > titleB) {
-                        return 1;
-                    }
-                    return 0;
-                });
-              
-                setArticles(newsArticles)
+                setArticles(data)
                 setError(null)
                 setLoading(false)
-
             } catch (error) {
                 console.log(error.message)
                 setError(error.message)
                 setLoading(false)
             }
         }
-    
-            getNews()
-      }, []);
+
+        fetchNews()
+    }, [])
 
     return (
-        <div className='container my-4 mx-auto px-4'>
+        <div className='container my-4 mx-auto'>
             { loading ?
                 <div className='mx-auto py-4 animate-pulse flex flex-col items-center'>
                     <img 
@@ -86,13 +72,16 @@ export default function HomeNews({location, apiTitle}) {
                         </Link>
                     ))}
                     <Link 
-                        to={`/${location}`}
+                        to={`/${category}`}
                         className='inline-block'
                     >
-                        <p className="font-semibold border px-3 py-1 rounded-full border-blue-800 bg-blue-800 
+                        <div className="flex items-center text-lg font-semibold border px-3 py-1 rounded-full border-blue-800 bg-blue-800 
                         text-white hover:bg-white duration-300 hover:text-blue-800">
-                            Check More Articles
-                        </p>
+                            <p className='mr-1'>
+                                Check out the latest {category} headlines
+                            </p>
+                            <FaArrowRight />
+                        </div>
                     </Link>
                 </div>
             )

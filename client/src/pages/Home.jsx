@@ -4,7 +4,7 @@ import HomeNews from '../components/HomeNews';
 import { Link } from 'react-router-dom';
 
 export default function Home() {
-  const [headlines, setHeadlines] = useState([])
+  const [headlines, setHeadlines] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -14,7 +14,7 @@ export default function Home() {
         setLoading(true);
         const res = await fetch ('/api/getTopNews');
         const data = await res.json();
-        console.log(data)
+        console.log(data);
         if (data.success === false) {
           setError(data.message)
           setLoading(false)
@@ -33,9 +33,9 @@ export default function Home() {
           return 0;
         });
 
-        setHeadlines(newsArticles)
-        setError(null)
-        setLoading(false)
+        setHeadlines(newsArticles);
+        setError(null);
+        setLoading(false);
         
       } catch (error) {
         console.log(error.message)
@@ -47,15 +47,22 @@ export default function Home() {
   }, []);
   
   return (
-    <div>
-      <div className='text-5xl font-bold container mt-4 mx-auto px-4'>
-        <p>
-          Latest Philippine news at your fingertips. Welcome!
-        </p>
+    <div className=''>
+      <div 
+        className='mt-4 bg-blue-100 flex items-center justify-center h-[500px] 
+          bg-cover mx-0 lg:mx-2 lg:px-4 lg:rounded-3xl'
+        style={{
+          backgroundImage: `url('/home.jpg')`,
+          textShadow: '0 0 5px rgba(0,0,0,0.5)'
+        }}
+      >
+        <div className='text-6xl text-white font-bold container mx-auto px-4'>
+            Latest Philippine news at your fingertips. Welcome!
+        </div>
       </div>
 
-      <div className='text-2xl font-semibold container mt-4 mx-auto px-4'>
-        <p>
+      <div className='container mt-10 mx-auto px-4'>
+        <p className='text-3xl font-bold '>
           Today's Headlines
         </p>
         <div className='my-4 flex gap-4'>
@@ -84,20 +91,12 @@ export default function Home() {
           </div>
           :
           headlines.length > 0 ? (
-            <div>
-              {headlines.slice(0, 4).map((headline, index) => (
-                <Link 
-                    key={index}
-                    to={headline.link}
-                    target='_blank'
-                >
-                  <HomeHeadlinesCard article={headline}/>
-                </Link>
-              ))}
+            <div className='w-full'>
+                <HomeHeadlinesCard articles={headlines}/>
             </div>
           )
           :
-          <div className='mx-auto pt-32 h-screen flex flex-col items-center'>
+          <div className='mx-auto py-4 h-screen flex flex-col items-center'>
             <img 
                 className='h-[120px]'
                 src="/magnifying-glass.svg" 
@@ -111,54 +110,54 @@ export default function Home() {
         </div>
       </div>
 
-      <div className='text-2xl font-semibold container mt-4 mx-auto px-4'>
-        <p>
-          World News
+      <div className='container mt-10 border-t-2 mx-auto px-4'>
+        <p className='text-3xl mt-10 font-bold'>
+          Yesterday's World News
         </p>
-        <HomeNews location={'world'} apiTitle={'getWorldNews'} />
+        <HomeNews category={'world'}/>
       </div>
 
-      <div className='text-2xl font-semibold container mt-4 mx-auto px-4'>
-        <p>
-          Business News
+      <div className='container mt-10 border-t-2 mx-auto px-4'>
+        <p className='text-3xl mt-10 font-bold'>
+          Yesterday's Business News
         </p>
-        <HomeNews location={'business'} apiTitle={'getBusinessNews'} />
+        <HomeNews category={'business'}/>
 
       </div>
 
-      <div className='text-2xl font-semibold container mt-4 mx-auto px-4'>
-        <p>
-          Entertainment News
+      <div className='container mt-10 border-t-2 mx-auto px-4'>
+        <p className='text-3xl mt-10 font-bold'>
+          Yesterday's Entertainment News
         </p>
-        <HomeNews location={'entertainment'} apiTitle={'getEntertainmentNews'} />
+        <HomeNews category={'entertainment'}/>
       </div>
 
-      <div className='text-2xl font-semibold container mt-4 mx-auto px-4'>
-        <p>
-          Technology News
+      <div className='container mt-10 border-t-2 mx-auto px-4'>
+        <p className='text-3xl mt-10 font-bold'>
+          Yesterday's Technology News
         </p>
-        <HomeNews location={'technology'} apiTitle={'getTechnologyNews'} />
+        <HomeNews category={'technology'}/>
       </div>
 
-      <div className='text-2xl font-semibold container mt-4 mx-auto px-4'>
-        <p>
-          Sports News
+      <div className='container mt-10 border-t-2 mx-auto px-4'>
+        <p className='text-3xl mt-10 font-bold'>
+          Yesterday's Sports News
         </p>
-        <HomeNews location={'sports'} apiTitle={'getSportsNews'} />
+        <HomeNews category={'sports'}/>
       </div>
 
-      <div className='text-2xl font-semibold container mt-4 mx-auto px-4'>
-        <p>
-          Lifestyle News
+      <div className='container mt-10 border-t-2 mx-auto px-4'>
+        <p className='text-3xl mt-10 font-bold'>
+          Yesterday's Lifestyle News
         </p>
-        <HomeNews location={'lifestyle'} apiTitle={'getLifestyleNews'} />
+        <HomeNews category={'lifestyle'}/>
       </div>
 
-      <div className='text-2xl font-semibold container mt-4 mx-auto px-4'>
-        <p>
-          Opinions        
+      <div className='container my-10 border-t-2 mx-auto px-4'>
+        <p className='text-3xl mt-10 font-bold'>
+          Yesterday's Opinions        
         </p>
-        <HomeNews location={'opinion'} apiTitle={'getOpinionNews'} />
+        <HomeNews category={'opinion'}/>
       </div>
 
     </div>

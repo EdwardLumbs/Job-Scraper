@@ -22,6 +22,7 @@ export default function World() {
           return
         }
         setArticles(data)
+        console.log(data)
 
         const newsArticles = data.sort((a, b) => {
           const titleA = a.title.toUpperCase();
@@ -39,6 +40,30 @@ export default function World() {
         setFilteredArticles(newsArticles)
         setError(null)
         setLoading(false)
+
+        for (const obj of data) {
+          try {
+            const response = await fetch ('/api/addArticles', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(obj)
+            });
+            const statusData = await response.json();
+            if (statusData.success === false) {
+              console.log(obj)
+              setLoading(false);
+              setError(statusData.message);
+              // setTimeout(() => {
+              //   setError(null);
+              // }, 2000);
+              return;
+            }
+          } catch (error) {
+            console.error('Error inserting object:', obj, error);
+          }
+        }
         
       } catch (error) {
         console.log(error.message)
@@ -64,6 +89,11 @@ export default function World() {
           setFilteredArticles={setFilteredArticles}
           articles={articles}
         />
+        <div>
+          <p className='my-10 font-bold text-5xl'>
+            Today's World Headlines
+          </p>
+        </div>
 
         <div className='mt-10'>
           { loading ? 
@@ -91,11 +121,6 @@ export default function World() {
           :
             filteredArticles.length > 0 ? (
             <div className=''>
-              <div>
-                <p className='mb-4 font-bold text-3xl'>
-                  Today's World Headlines
-                </p>
-              </div>
               <Headlines articles={filteredArticles}/>
             </div>
             )
