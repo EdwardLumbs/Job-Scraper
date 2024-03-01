@@ -10,6 +10,7 @@ import Lifestyle from './pages/Lifestyle';
 import Opinion from './pages/Opinion';
 import Footer from './components/Footer';
 import Top from './pages/Top';
+import NotFound from './pages/NotFound';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path='/sports' element={<Sports/>}/>
         <Route path='/lifestyle' element={<Lifestyle/>}/>
         <Route path='/opinion' element={<Opinion/>}/>
+        <Route path='*' element={<NotFound/>}/>
       </Routes>
       <Footer/>
     </BrowserRouter>
