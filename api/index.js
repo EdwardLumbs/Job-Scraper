@@ -204,10 +204,10 @@ app.get('/getOpinionNews', async (req, res, next) => {
     }
 });
 
-app.use(express.static(path.join(__dirname, '/client')));
+app.use(express.static(path.join(__dirname, '/client/dist')));
 
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'client', 'index.html'))
+    res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'))
 });
 
 app.listen(3000, () => {
