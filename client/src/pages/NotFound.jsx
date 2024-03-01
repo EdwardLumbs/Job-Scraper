@@ -4,7 +4,7 @@ export default function NotFound() {
   return (
     <div className="h-screen flex flex-col w-full"
     >
-      <div className="text-white h-full gap-4 flex flex-col justify-center items-center">
+      <div className="h-full gap-4 flex flex-col justify-center items-center">
         <h1 className="font-bold text-8xl">
           404 Error
         </h1>

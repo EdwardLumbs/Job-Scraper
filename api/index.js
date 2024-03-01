@@ -10,17 +10,11 @@ import {getRapplerNews,
         getPhilStarNews,
         getBusinessWorldNews} from './scraperFunctions.js'
 
-const app = express();
-
 const __dirname = path.resolve();
 
+const app = express();
+
 app.use(express.json());
-
-app.use(express.static(path.join(__dirname, '/client/dist')));
-
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'))
-});
 
 app.post('/addArticles', async (req, res, next) => {
     const { title, image, link, category, source } = req.body;
@@ -39,6 +33,7 @@ app.post('/addArticles', async (req, res, next) => {
 });
 
 app.get('/getArticles/:category', async (req, res, next) => {
+    console.log('clicked')
     const { category } = req.params;
     try {
         const data = await pool.query(`SELECT *
@@ -78,6 +73,8 @@ const fetchAndPush = async (fetchFunction, newsFeed, category) => {
 
 // Route handlers
 app.get('/getTopNews', async (req, res, next) => {
+    console.log('clicked')
+
     const newsFeed = [];
     try {
         await Promise.all([
@@ -207,6 +204,11 @@ app.get('/getOpinionNews', async (req, res, next) => {
     }
 });
 
+app.use(express.static(path.join(__dirname, '/client')));
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'client', 'index.html'))
+});
 
 app.listen(3000, () => {
     console.log(`Server running on port 3000`);

@@ -10,10 +10,17 @@ export default function Home() {
 
   useEffect(() => {
     const getTopNews = async () => {
+      console.log('clicked')
       try {
         setLoading(true);
+        console.log('clicked')
+
         const res = await fetch ('/api/getTopNews');
+        console.log(res)
+
         const data = await res.json();
+        console.log('clicked')
+
         console.log(data);
         if (data.success === false) {
           setError(data.message)
