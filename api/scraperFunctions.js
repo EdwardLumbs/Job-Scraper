@@ -1,9 +1,9 @@
 import pw from 'playwright';
 
-export const takeScreenshot = async (page, log) => {
-    console.log(log ? log + 'Captured' : 'Taking screenshot to page.png')
-    await page.screenshot({ path: 'page.png', fullPage: true })
-}
+// export const takeScreenshot = async (page, log) => {
+//     console.log(log ? log + 'Captured' : 'Taking screenshot to page.png')
+//     await page.screenshot({ path: 'page.png', fullPage: true })
+// }
 
 export const getRapplerNews = async (site, selector) => {
     console.log('Connecting to browser...');
@@ -14,8 +14,8 @@ export const getRapplerNews = async (site, selector) => {
     const newsFeed = []
     try {
         await page.goto(site, {timeout: 2 * 60 * 1000 });
-        console.log('Navigated to website. Scraping commenced');
-        await takeScreenshot(page, 'Opening Rappler...');
+        console.log('Navigated to rappler. Scraping commenced');
+        // await takeScreenshot(page, 'Opening Rappler...');
     
         newsFeed.push({
             title: await page.$eval('.post-card__primary-story h3 a', 
@@ -45,7 +45,7 @@ export const getRapplerNews = async (site, selector) => {
 
         return newsFeed
     } catch (error) {
-        await takeScreenshot(page, 'Error');
+        // await takeScreenshot(page, 'Error');
         throw error;
     } finally {
         await browser.close();
@@ -62,8 +62,8 @@ export const getMBNews = async (site) => {
     
     try {
         await page.goto(site, {timeout: 2 * 60 * 1000 });
-        console.log('Navigated to website. Scraping commenced');
-        await takeScreenshot(page, 'Opening Manila Bulletin...');
+        console.log('Navigated to Manila Bulletin. Scraping commenced');
+        // await takeScreenshot(page, 'Opening Manila Bulletin...');
 
         await page.waitForSelector('.article-list .row.mb-5')
         const mbTopStories = await page.$$('.article-list .row.mb-5')
@@ -81,8 +81,8 @@ export const getMBNews = async (site) => {
             console.log(typeof styleAttribute)
             const imageUrlMatch = styleAttribute.match(/url\("([^"]+)"\)/);
             // add default image if no image found
-            const image = imageUrlMatch
-            const source = 'Manile Bulletin'
+            const image = (imageUrlMatch ? imageUrlMatch : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTEAO6wUevcNzeGQhkd-fkYgtOdvKxHF6ytlu9bOwieFg&s')
+            const source = 'Manila Bulletin'
             
             newsFeed.push({ title, link, image, source });
         }
@@ -90,7 +90,7 @@ export const getMBNews = async (site) => {
 
         return newsFeed
     } catch (error) {
-        await takeScreenshot(page, 'Error');
+        // await takeScreenshot(page, 'Error');
         throw error;
     } finally {
         await browser.close();
@@ -106,8 +106,8 @@ export const getInquirerNews = async (site) => {
     const newsFeed = []
     try {
         await page.goto(site, {timeout: 2 * 60 * 1000 });
-        console.log('Navigated to website. Scraping commenced');
-        await takeScreenshot(page, 'Opening Inquirer...');
+        console.log('Navigated to Inquirer. Scraping commenced');
+        // await takeScreenshot(page, 'Opening Inquirer...');
 
         const stories =  await page.$$('#new-channel-grid #ncg-box')
         const inquirerTopStories = stories.slice(0, 15);
@@ -131,7 +131,7 @@ export const getInquirerNews = async (site) => {
   
         return newsFeed
     } catch (error) {
-        await takeScreenshot(page, 'Error');
+        // await takeScreenshot(page, 'Error');
         throw error;
     } finally {
         await browser.close();
@@ -147,8 +147,8 @@ export const getPhilStarNews = async (site) => {
     const newsFeed = []
     try {
         await page.goto(site, {timeout: 2 * 60 * 1000 });
-        console.log('Navigated to website. Scraping commenced');
-        await takeScreenshot(page, 'Opening PhilStar...');
+        console.log('Navigated to PhilStar. Scraping commenced');
+        // await takeScreenshot(page, 'Opening PhilStar...');
 
         const philStarTopStories =  await page.$$('.carousel__items .carousel__item');
         console.log(philStarTopStories.length);
@@ -217,7 +217,7 @@ export const getPhilStarNews = async (site) => {
         return newsFeed
     } catch (error) {
         console.log('Error occurred while scraping story:', error);
-        await takeScreenshot(page, 'Error');
+        // await takeScreenshot(page, 'Error');
         throw error;
     } finally {
         await browser.close();
@@ -233,8 +233,8 @@ export const getBusinessWorldNews = async (site) => {
     const newsFeed = []
     try {
         await page.goto(site, {timeout: 2 * 60 * 1000 });
-        console.log('Navigated to website. Scraping commenced');
-        await takeScreenshot(page, 'Opening Business World...');
+        console.log('Navigated to Business World. Scraping commenced');
+        // await takeScreenshot(page, 'Opening Business World...');
 
         const bwTopStories =  await page.$$('.td-ss-main-content .td_module_10');
         console.log(bwTopStories.length);
@@ -256,7 +256,7 @@ export const getBusinessWorldNews = async (site) => {
         return newsFeed
     } catch (error) {
         console.log('Error occurred while scraping story:', error);
-        await takeScreenshot(page, 'Error');
+        // await takeScreenshot(page, 'Error');
         throw error;
     } finally {
         await browser.close();
