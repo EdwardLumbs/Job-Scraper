@@ -2,6 +2,7 @@ import retry from 'async-retry';
 import express from 'express';
 import pool from './database/db.js';
 import { errorHandler } from './error.js';
+import path from 'path';
 
 import {getRapplerNews,
         getMBNews,
@@ -11,7 +12,15 @@ import {getRapplerNews,
 
 const app = express();
 
+const __dirname = path.resolve();
+
 app.use(express.json());
+
+app.use(express.static(path.join(__dirname, '/client/dist')));
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'))
+});
 
 app.post('/addArticles', async (req, res, next) => {
     const { title, image, link, category, source } = req.body;
@@ -27,7 +36,7 @@ app.post('/addArticles', async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-})
+});
 
 app.get('/getArticles/:category', async (req, res, next) => {
     const { category } = req.params;
@@ -46,9 +55,9 @@ app.get('/getArticles/:category', async (req, res, next) => {
         res.status(200).json(data.rows);
     } catch (error) {
         next(error)
-    }
+    };
 
-})
+});
 
 
 const fetchAndPush = async (fetchFunction, newsFeed, category) => {
@@ -64,7 +73,7 @@ const fetchAndPush = async (fetchFunction, newsFeed, category) => {
         console.log(newsFeed)
     } catch (error) {
         console.error('Error fetching news:', error);
-    }
+    };
 };
 
 // Route handlers
@@ -82,7 +91,7 @@ app.get('/getTopNews', async (req, res, next) => {
         res.status(200).json(newsFeed);
     } catch (error) {
         next(error);
-    }
+    };
 });
 
 app.get('/getWorldNews', async (req, res, next) => {
