@@ -20,7 +20,7 @@ app.use(cors());
 
 app.post('/addArticles', async (req, res, next) => {
     const { title, image, link, category, source } = req.body;
-
+    console.log(req.body)
     try {
         await pool.query(`INSERT INTO news (title, image, link, category, source)
             VALUES ($1, $2, $3, $4, $5)
@@ -30,6 +30,7 @@ app.post('/addArticles', async (req, res, next) => {
         res.status(201).json('Inserted Successfully');
         return
     } catch (error) {
+        console.log(error)
         next(error);
     }
 });
@@ -136,6 +137,7 @@ app.get('/getEntertainmentNews', async (req, res, next) => {
             fetchAndPush(() => getInquirerNews('https://entertainment.inquirer.net/'), newsFeed, 'entertainment'),
             fetchAndPush(() => getPhilStarNews('https://www.philstar.com/entertainment'), newsFeed, 'entertainment')
         ]);
+        console.log(newsFeed)
 
         res.status(200).json(newsFeed);
     } catch (error) {

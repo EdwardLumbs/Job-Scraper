@@ -12,7 +12,7 @@ CREATE TABLE news (
 -- enter news
 INSERT INTO news (title, image, link, category, source)
 VALUES ($1, $2, $3)
-ON CONFLICT (title, image, link) DO NOTHING
+ON CONFLICT (title, image, link) DO UPDATE
 
 -- get news
 SELECT *
