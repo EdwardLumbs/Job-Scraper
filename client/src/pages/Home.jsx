@@ -15,7 +15,7 @@ export default function Home() {
         setLoading(true);
         console.log('clicked')
 
-        const res = await fetch ('/api/getTopNews');
+        const res = await fetch ('http://localhost:3000/getTopNews');
         console.log(res)
 
         const data = await res.json();

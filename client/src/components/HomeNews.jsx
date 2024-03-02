@@ -12,7 +12,7 @@ export default function HomeNews({category}) {
         const fetchNews = async () => {
             try {
                 setLoading(true);
-                const res = await fetch(`/api/getArticles/${category}`)
+                const res = await fetch(`http://localhost:3000/getArticles/${category}`)
                 const data = await res.json()
                 console.log(data)
 

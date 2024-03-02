@@ -12,7 +12,7 @@ export default function Entertainment() {
     const getEntertainmentNews = async () => {
       try {
         setLoading(true);
-        const res = await fetch ('/api/getEntertainmentNews');
+        const res = await fetch ('http://localhost:3000/getEntertainmentNews');
         const data = await res.json();
         console.log(data)
 
@@ -43,7 +43,7 @@ export default function Entertainment() {
 
         for (const obj of data) {
           try {
-            const response = await fetch ('/api/addArticles', {
+            const response = await fetch ('http://localhost:3000/addArticles', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
