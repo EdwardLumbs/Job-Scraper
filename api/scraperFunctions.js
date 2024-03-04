@@ -3,7 +3,7 @@ import pw from 'playwright';
 // export const takeScreenshot = async (page, log) => {
 //     console.log(log ? log + 'Captured' : 'Taking screenshot to page.png')
 //     await page.screenshot({ path: 'page.png', fullPage: true })
-// }
+// 
 
 export const getRapplerNews = async (site, selector) => {
     console.log('Connecting to browser...');
