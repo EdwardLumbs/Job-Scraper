@@ -12,7 +12,7 @@ export default function Opinion() {
     const getOpinionNews = async () => {
       try {
         setLoading(true);
-        const res = await fetch ('http://localhost:3000/getOpinionNews');
+        const res = await fetch ('/api/news/getOpinionNews');
         const data = await res.json();
         console.log(data)
 
@@ -43,7 +43,7 @@ export default function Opinion() {
 
         for (const obj of data) {
           try {
-            const response = await fetch ('http://localhost:3000/addArticles', {
+            const response = await fetch ('/api/articles/addArticles', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

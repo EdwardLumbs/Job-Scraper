@@ -13,7 +13,7 @@ export default function Business() {
     const getBusinessNews = async () => {
       try {
         setLoading(true);
-        const res = await fetch ('http://localhost:3000/getBusinessNews');
+        const res = await fetch ('/api/news/getBusinessNews');
         const data = await res.json();
         console.log(data)
 
@@ -44,7 +44,7 @@ export default function Business() {
 
         for (const obj of data) {
           try {
-            const response = await fetch ('http://localhost:3000/addArticles', {
+            const response = await fetch ('/api/articles/addArticles', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
