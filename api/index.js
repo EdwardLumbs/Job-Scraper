@@ -14,12 +14,6 @@ app.use(cors());
 app.use('/api/news', newsRouter);
 app.use('/api/articles', articlesRouter);
 
-app.use(express.static(path.join(__dirname, '/client/dist')));
-
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'))
-});
-
 app.listen(3000, () => {
     console.log(`Server running on port 3000`);
 });
